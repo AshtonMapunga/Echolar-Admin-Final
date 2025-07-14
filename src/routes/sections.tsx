@@ -9,6 +9,11 @@ import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgr
 
 import { AuthLayout } from 'src/layouts/auth';
 import { DashboardLayout } from 'src/layouts/dashboard';
+import StudentManagementScreen from 'src/sections/students/student-view';
+import TeacherManagement from 'src/sections/teacher/teacher-view';
+import ReelsManagement from 'src/sections/reel/reel-view';
+import BannersManagement from 'src/sections/banners/banner-view';
+import ClassesManagement from 'src/sections/class/class-view';
 
 // ----------------------------------------------------------------------
 
@@ -53,6 +58,16 @@ export const routesSection: RouteObject[] = [
       { path: 'user', element: <UserPage /> },
       { path: 'products', element: <ProductsPage /> },
       { path: 'blog', element: <BlogPage /> },
+      { path: 'students', element: <StudentManagementScreen /> },
+      { path: 'teachers', element: <TeacherManagement /> },
+      { path: 'reels', element: <ReelsManagement /> },
+      { path: 'banners', element: <BannersManagement /> },
+      { path: 'classes', element: <ClassesManagement /> },
+
+
+
+
+
     ],
   },
   {

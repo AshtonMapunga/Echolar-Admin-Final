@@ -18,24 +18,33 @@ export const navData = [
     path: '/',
     icon: icon('ic-analytics'),
   },
-  {
-    title: 'User',
-    path: '/user',
+
+   {
+    title: 'Teachers',
+    path: '/teachers',
     icon: icon('ic-user'),
   },
-  {
-    title: 'Product',
-    path: '/products',
-    icon: icon('ic-cart'),
-    info: (
-      <Label color="error" variant="inverted">
-        +3
-      </Label>
-    ),
+   {
+    title: 'Classes',
+    path: '/classes',
+    icon: icon('ic-blog'),
+  },
+    {
+    title: 'Banners',
+    path: '/banners',
+    icon: icon('ic-blog'),
   },
   {
-    title: 'Blog',
-    path: '/blog',
+    title: 'Reals',
+    path: '/reels',
+    icon: icon('ic-cart'),
+   
+  },
+
+
+  {
+    title: 'Students',
+    path: '/students',
     icon: icon('ic-blog'),
   },
   {
@@ -43,9 +52,5 @@ export const navData = [
     path: '/sign-in',
     icon: icon('ic-lock'),
   },
-  {
-    title: 'Not found',
-    path: '/404',
-    icon: icon('ic-disabled'),
-  },
+
 ];
