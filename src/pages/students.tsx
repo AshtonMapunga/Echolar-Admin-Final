@@ -1,4 +1,5 @@
 import { CONFIG } from 'src/config-global';
+
 import StudentManagementScreen from 'src/sections/students/student-view';
 
 

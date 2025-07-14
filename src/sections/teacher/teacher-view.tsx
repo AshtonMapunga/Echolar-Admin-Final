@@ -1,28 +1,30 @@
 import { useState, useEffect } from 'react';
+
+import { Add, Edit, Delete, Refresh, Visibility } from '@mui/icons-material';
 import {
   Box,
-  Typography,
+  Chip,
   Paper,
   Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
   Button,
-  Chip,
   Avatar,
   Dialog,
+  Tooltip,
+  TableRow,
+  TableBody,
+  TableCell,
+  TableHead,
+  TextField,
+  Typography,
+  IconButton,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  CircularProgress,
-  IconButton,
-  Tooltip
+  TableContainer,
+  TablePagination,
+  CircularProgress
 } from '@mui/material';
-import { Refresh, Edit, Delete, Visibility, Add } from '@mui/icons-material';
+
 import AuthService from 'src/services/teacher_services';
 
 interface Teacher {
@@ -93,9 +95,7 @@ export default function TeacherManagement() {
   };
 
   // Function to get initials for avatar
-  const getInitials = (name: string) => {
-    return name.split(' ').map(n => n[0]).join('');
-  };
+  const getInitials = (name: string) => name.split(' ').map(n => n[0]).join('');
 
   return (
     <Box sx={{ p: 3 }}>

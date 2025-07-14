@@ -1,30 +1,30 @@
 import { useState, useEffect } from 'react';
+
+import { Add, Edit, Delete, Refresh } from '@mui/icons-material';
 import {
   Box,
-  Typography,
   Grid,
   Card,
-  CardMedia,
-  CardContent,
-  CardActions,
+  Paper,
+  Table,
   Button,
   Dialog,
+  TableRow,
+  CardMedia,
+  TextField,
+  TableBody,
+  Typography,
+  IconButton,
+  CardContent,
+  CardActions,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  CircularProgress,
-  IconButton,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
   TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination
+  TablePagination,
+  CircularProgress
 } from '@mui/material';
-import { Add, Refresh, Delete, Edit } from '@mui/icons-material';
+
 import BannersService from 'src/services/banners_services';
 
 interface Banner {
@@ -120,9 +120,7 @@ export default function BannersManagement() {
   };
 
   // Function to format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString();
 
   return (
     <Box sx={{ p: 3 }}>

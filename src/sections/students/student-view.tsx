@@ -1,25 +1,27 @@
 import React, { useState, useEffect } from 'react';
+
+import { Refresh } from '@mui/icons-material';
 import {
+  Box,
+  Chip,
   Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
   Paper,
-  TextField,
   Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
   Button,
   Avatar,
+  TableRow,
+  MenuItem,
+  TableBody,
+  TableCell,
+  TableHead,
+  TextField,
+  InputLabel,
   Typography,
-  Box,
-  CircularProgress,
-  Chip
+  FormControl,
+  TableContainer,
+  CircularProgress
 } from '@mui/material';
-import { FilterList, Refresh } from '@mui/icons-material';
+
 import AuthStudentService from 'src/services/student_Services';
 
 interface Student {
@@ -120,9 +122,7 @@ const StudentManagementScreen: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
-    return status === 'enabled' ? 'success' : 'error';
-  };
+  const getStatusColor = (status: string) => status === 'enabled' ? 'success' : 'error';
 
   return (
     <Box sx={{ p: 3 }}>

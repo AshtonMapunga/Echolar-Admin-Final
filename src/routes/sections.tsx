@@ -9,11 +9,12 @@ import LinearProgress, { linearProgressClasses } from '@mui/material/LinearProgr
 
 import { AuthLayout } from 'src/layouts/auth';
 import { DashboardLayout } from 'src/layouts/dashboard';
-import StudentManagementScreen from 'src/sections/students/student-view';
-import TeacherManagement from 'src/sections/teacher/teacher-view';
+
 import ReelsManagement from 'src/sections/reel/reel-view';
-import BannersManagement from 'src/sections/banners/banner-view';
 import ClassesManagement from 'src/sections/class/class-view';
+import BannersManagement from 'src/sections/banners/banner-view';
+import TeacherManagement from 'src/sections/teacher/teacher-view';
+import StudentManagementScreen from 'src/sections/students/student-view';
 
 // ----------------------------------------------------------------------
 

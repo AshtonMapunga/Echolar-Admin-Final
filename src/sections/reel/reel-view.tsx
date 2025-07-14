@@ -1,28 +1,30 @@
 import { useState, useEffect } from 'react';
+
+import { Add, Edit, Delete, Refresh, Visibility } from '@mui/icons-material';
 import {
   Box,
-  Typography,
+  Chip,
   Paper,
   Table,
+  Button,
+  Dialog,
+  Avatar,
+  Tooltip,
+  TableRow,
   TableBody,
   TableCell,
-  TableContainer,
   TableHead,
-  TableRow,
-  TablePagination,
-  Button,
-  Chip,
-  Dialog,
+  TextField,
+  Typography,
+  IconButton,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  CircularProgress,
-  IconButton,
-  Tooltip,
-  Avatar
+  TableContainer,
+  TablePagination,
+  CircularProgress
 } from '@mui/material';
-import { Add, Refresh, Delete, Edit, Visibility } from '@mui/icons-material';
+
 import RealmService from 'src/services/reels_services';
 
 interface Reel {
@@ -136,9 +138,7 @@ export default function ReelsManagement() {
   };
 
   // Function to format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString();
 
   return (
     <Box sx={{ p: 3 }}>

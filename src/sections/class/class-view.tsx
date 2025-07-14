@@ -1,38 +1,38 @@
 import { useState, useEffect } from 'react';
+
+import { Add, Edit, Delete, Refresh, Visibility, ExpandMore, ExpandLess } from '@mui/icons-material';
 import {
   Box,
-  Typography,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
-  Button,
   Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  TextField,
-  CircularProgress,
-  IconButton,
-  Tooltip,
-  Avatar,
-  MenuItem,
-  Select,
-  FormControl,
-  InputLabel,
   Grid,
   Card,
+  Paper,
+  Table,
+  Button,
+  Dialog,
+  Select,
+  Divider,
+  TableRow,
+  MenuItem,
+  TableBody,
+  TableCell,
+  TableHead,
+  TextField,
   CardMedia,
+  Typography,
+  IconButton,
+  InputLabel,
+  DialogTitle,
+  FormControl,
   CardContent,
   CardActions,
-  Divider
+  DialogContent,
+  DialogActions,
+  TableContainer,
+  TablePagination,
+  CircularProgress
 } from '@mui/material';
-import { Add, Refresh, Delete, Edit, Visibility, ExpandMore, ExpandLess } from '@mui/icons-material';
+
 import ClassService from 'src/services/classes_services';
 
 interface ClassItem {
@@ -211,9 +211,7 @@ export default function ClassesManagement() {
   };
 
   // Function to format date
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
-  };
+  const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString();
 
   return (
     <Box sx={{ p: 3 }}>
