@@ -39,6 +39,34 @@ export const navData = [
     icon: icon('ic-cart'),
    
   },
+  {
+    title: 'Quiz',
+    path: '/quize',
+    icon: icon('ic-cart'),
+   
+  },
+    {
+    title: 'Exam Papers',
+    path: '/exampapers',
+    icon: icon('ic-cart'),
+   
+  },
+
+  
+    {
+    title: 'Payments',
+    path: '/payments',
+    icon: icon('ic-cart'),
+   
+  },
+
+    {
+    title: 'Quiz',
+    path: '/quize',
+    icon: icon('ic-cart'),
+   
+  },
+
 
 
   {

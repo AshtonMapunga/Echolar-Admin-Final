@@ -15,6 +15,8 @@ import ClassesManagement from 'src/sections/class/class-view';
 import BannersManagement from 'src/sections/banners/banner-view';
 import TeacherManagement from 'src/sections/teacher/teacher-view';
 import StudentManagementScreen from 'src/sections/students/student-view';
+import ExamPaperManagement from 'src/sections/examppr/exam_ppr';
+import QuizManagement from 'src/sections/quize/quize';
 
 // ----------------------------------------------------------------------
 
@@ -62,6 +64,10 @@ export const routesSection: RouteObject[] = [
       { path: 'students', element: <StudentManagementScreen /> },
       { path: 'teachers', element: <TeacherManagement /> },
       { path: 'reels', element: <ReelsManagement /> },
+      { path: 'exampapers', element: <ExamPaperManagement /> },
+            { path: 'quize', element: <QuizManagement /> },
+
+
       { path: 'banners', element: <BannersManagement /> },
       { path: 'classes', element: <ClassesManagement /> },
 

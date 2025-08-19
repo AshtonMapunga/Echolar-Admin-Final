@@ -111,7 +111,7 @@ const AuthStudentService = {
           },
         }
       );
-
+print("response status students------------------", response.status)
       if (response.status === 200 && Array.isArray(response.data?.data)) {
         return response.data.data;
       }
