@@ -1,48 +1,129 @@
-## Minimal UI ([Free version](https://free.minimals.cc/))
+# QuickPro Solutions - Company Registration Chatbot
 
-![license](https://img.shields.io/badge/license-MIT-blue.svg)
+A WhatsApp chatbot built with Node.js and Twilio for automating company registration processes in Zimbabwe.
 
-![preview](public/assets/images/minimal-free-preview.jpg)
+## 🌟 Features
 
-> Free React Admin Dashboard made with Material-UI components and React + Vite.js.
+- **Interactive WhatsApp Integration**: Seamless conversation flow through WhatsApp
+- **Complete Registration Process**: Collects all necessary information for company registration
+- **Multiple Business Types**: Supports Pvt Ltd, Public Ltd, Partnership, Sole Proprietorship, Trust, and NPO
+- **Data Validation**: Input validation for emails, phone numbers, and ID numbers
+- **Admin Dashboard**: API endpoints for managing registrations
+- **Database Storage**: MongoDB integration for persistent data storage
+- **Session Management**: Handles multiple concurrent user sessions
 
-## Pages
+## 🚀 Quick Start
 
-- [Dashboard](https://free.minimals.cc/)
-- [Users](https://free.minimals.cc/user)
-- [Products](https://free.minimals.cc/products)
-- [Blog](https://free.minimals.cc/blog)
-- [Sign in](https://free.minimals.cc/sign-in)
-- [Not found](https://free.minimals.cc/404)
+### Prerequisites
 
-## Quick start
+- Node.js (v16 or higher)
+- MongoDB (local or Atlas)
+- Twilio Account with WhatsApp sandbox or approved number
+- ngrok (for local development)
 
-- Clone the repo: `git clone https://github.com/minimal-ui-kit/material-kit-react.git`
-- Recommended: `Node.js v20.x`
-- **Install:** `npm i` or `yarn install`
-- **Start:** `npm run dev` or `yarn dev`
-- **Build:** `npm run build` or `yarn build`
-- Open browser: `http://localhost:3039`
+### Installation
 
-## Upgrade to PRO Version
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd quickpro-company-registration-chatbot
+   ```
 
-| Minimal Free                | [Minimal Pro](https://material-ui.com/store/items/minimal-dashboard/)                                   |
-| :-------------------------- | :------------------------------------------------------------------------------------------------------ |
-| **6** Pages                 | **70+** Pages                                                                                           |
-| **Partial** theme customize | **Fully** theme customize                                                                               |
-| -                           | **Next.js** version                                                                                     |
-| -                           | **TypeScript** version (Standard Plus and Extended license)                                             |
-| -                           | Design **Figma** file (Standard Plus and Extended license)                                              |
-| -                           | Authentication with **Amplify**, **Auth0**, **JWT**, **Firebase** and **Supabase**                      |
-| -                           | Light/dark mode, right-to-left, form validation... ([+more components](https://minimals.cc/components)) |
-| -                           | Complete users flows                                                                                    |
-| -                           | 1 year of free updates / 6 months of technical support                                                  |
-| -                           | Learn more: [Package & license](https://docs.minimals.cc/package)                                       |
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
 
-## License
+3. **Environment Setup**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your credentials
+   ```
 
-Distributed under the [MIT](https://github.com/minimal-ui-kit/minimal.free/blob/main/LICENSE.md) license.
+4. **Configure your .env file**
+   ```env
+   TWILIO_ACCOUNT_SID=your_account_sid
+   TWILIO_AUTH_TOKEN=your_auth_token
+   MONGODB_URI=mongodb://localhost:27017/company_registration
+   PORT=3000
+   ```
 
-## Contact us
+5. **Start MongoDB**
+   ```bash
+   # Local MongoDB
+   mongod
+   
+   # Or use MongoDB Atlas connection string in .env
+   ```
 
-Email: support@minimals.cc
+6. **Run the application**
+   ```bash
+   # Development
+   npm run dev
+   
+   # Production
+   npm start
+   ```
+
+## 🔧 Twilio Configuration
+
+### 1. WhatsApp Sandbox Setup (Development)
+
+1. Log into your [Twilio Console](https://console.twilio.com)
+2. Navigate to **Messaging** → **Try it out** → **Send a WhatsApp message**
+3. Follow the instructions to join your sandbox
+4. Set your webhook URL: `https://your-ngrok-url.com/webhook`
+
+### 2. Production WhatsApp Number
+
+1. Request WhatsApp Business API access from Twilio
+2. Get your number approved
+3. Configure webhook URL: `https://your-domain.com/webhook`
+
+### 3. Webhook Configuration
+
+```javascript
+// Your webhook URL should be accessible publicly
+POST https://your-domain.com/webhook
+
+// For local development with ngrok:
+POST https://abc123.ngrok.io/webhook
+```
+
+## 📱 User Flow
+
+1. **Welcome**: User sends any message to start
+2. **Start Process**: User replies with "START"
+3. **Company Name**: Enter desired company name
+4. **Business Type**: Select from 6 business types
+5. **Director Info**: Provide main director details
+6. **Share Capital**: Enter share capital amount
+7. **Addresses**: Business and director addresses
+8. **Contact Info**: Email address
+9. **Additional Directors**: Optional additional directors
+10. **Business Description**: Brief description of business
+11. **Review**: Review all information
+12. **Confirmation**: Submit application
+
+## 🛠 API Endpoints
+
+### Registration Management
+
+```bash
+# Get all registrations
+GET /api/registrations
+
+# Get specific registration
+GET /api/registrations/:id
+
+# Update registration status
+PATCH /api/registrations/:id/status
+{
+  "status": "approved" | "pending" | "rejected"
+}
+
+# Health check
+GET /health
+```
+
+### Example API
