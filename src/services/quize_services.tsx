@@ -39,7 +39,6 @@ const QuizeServices = {
         }
       );
       
-      print("hello------------------------", response)
       return response.status === 201;
     } catch (error) {
       return false;
