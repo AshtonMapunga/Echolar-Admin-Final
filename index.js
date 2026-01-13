@@ -95,12 +95,13 @@ debug('Environment', {
 });
 
 // Twilio credentials - update these with your actual credentials
+const accountSid = process.env.TWILIO_ACCOUNT_SID || 'YOUR_ACCOUNT_SID';
 const authToken = process.env.TWILIO_AUTH_TOKEN || 'YOUR_AUTH_TOKEN';
 
 
-const accountSid = 'AC1b18fc71b6f3d0532f7552da14cfb52e';
 
 
+console.log("SID value------------------------:", process.env.TWILIO_ACCOUNT_SID);
 
 
 debug('Twilio Configuration', {
