@@ -3,7 +3,7 @@ const ChurchRegistrationService = require('../service/church_reg_service');
 
 const router = express.Router();
 const churchRegistrationService = new ChurchRegistrationService();
-
+// cooment
 // Middleware to log all requests
 router.use((req, res, next) => {
     console.log(`[${new Date().toISOString()}] ${req.method} ${req.originalUrl}`);
