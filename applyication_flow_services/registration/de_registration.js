@@ -22,7 +22,7 @@ class CompanyDeRegistrationFlow {
         this.SUCCESS_TEMPLATE = 'HX_deregistration_success'; // New success template
 
         // API base URL
-        this.API_BASE_URL = 'https://chatbotbackend-1ox6.onrender.com/api/v1';
+        this.API_BASE_URL = 'https://echolar-admin-final.onrender.com/api/v1';
 
         // Information collection fields
         this.COMPANY_INFO_FIELDS = [

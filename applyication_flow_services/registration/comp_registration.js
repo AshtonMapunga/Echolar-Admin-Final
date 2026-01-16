@@ -18,7 +18,7 @@ class CompanyRegistrationFlow {
         };
 
         // API base URL - configure this based on your environment
-        this.API_BASE_URL = 'https://chatbotbackend-1ox6.onrender.com/api/v1';
+        this.API_BASE_URL = 'https://echolar-admin-final.onrender.com/api/v1';
 
         // Information collection structure
         this.COMPANY_NAME_FIELDS = [

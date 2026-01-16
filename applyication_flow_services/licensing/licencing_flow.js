@@ -82,7 +82,7 @@ class LicensingFlow {
         };
 
         // API endpoint for submitting license applications
-        this.API_ENDPOINT = process.env.LICENSE_API_ENDPOINT || 'https://chatbotbackend-1ox6.onrender.com/api/v1/licence-applications';
+        this.API_ENDPOINT = process.env.LICENSE_API_ENDPOINT || 'https://echolar-admin-final.onrender.com/api/v1/licence-applications';
 
         this.debug = this.debug.bind(this);
     }

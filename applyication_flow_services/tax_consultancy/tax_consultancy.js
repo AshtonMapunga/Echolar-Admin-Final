@@ -143,7 +143,7 @@ class TaxConsultancyFlow {
         };
 
         // API base URL
-        this.API_BASE_URL = 'https://chatbotbackend-1ox6.onrender.com/api/v1';
+        this.API_BASE_URL = 'https://echolar-admin-final.onrender.com/api/v1';
 
         this.debug = this.debug.bind(this);
     }

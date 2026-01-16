@@ -26,7 +26,7 @@ class CompanyReRegistrationFlow {
         this.ANNUAL_RETURN_FEE = 50;
 
         // API base URL
-        this.API_BASE_URL = 'https://chatbotbackend-1ox6.onrender.com/api/v1';
+        this.API_BASE_URL = 'https://echolar-admin-final.onrender.com/api/v1';
 
         // Information collection fields (updated without icons)
         this.COMPANY_INFO_FIELDS = [
