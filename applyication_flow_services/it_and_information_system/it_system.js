@@ -95,17 +95,23 @@ class ITManagementFlow {
         const subService = this.IT_SUB_SERVICES[subServiceName];
         
         if (subService) {
+            session.state = subService.state; // Keep as sub-service state
             session.selectedSubService = subServiceName;
-            session.state = this.IT_STATES.PRICING_INFO; // Changed to go directly to PRICING_INFO
             session.applicationData = {}; // Initialize application data
             
             this.debug('Starting IT sub-service', {
                 phoneNumber,
                 subService: subServiceName,
-                state: session.state
+                state: subService.state,
+                templateId: subService.templateId
             });
 
-            return this.showPricingInformation(session); // Show pricing immediately
+            // Return the template for the selected sub-service
+            return {
+                type: 'template',
+                templateSid: subService.templateId,
+                variables: {}
+            };
         }
 
         return {
@@ -152,17 +158,32 @@ class ITManagementFlow {
             originalMessage: message
         });
 
-        // Handle "proceed" or "apply" in PRICING_INFO state
-        if ((userInput === 'proceed' || userInput === 'apply') && 
-            session.state === this.IT_STATES.PRICING_INFO) {
+        // Handle "proceed" or "apply" in PRICING_INFO state OR in sub-service states
+        if (userInput === 'proceed' || userInput === 'apply') {
+            // Check if we're in a sub-service state (IT_AUDIT, SOFTWARE_INTELLIGENCE, etc.)
+            const subServiceStates = [
+                this.IT_STATES.IT_AUDIT,
+                this.IT_STATES.SOFTWARE_INTELLIGENCE,
+                this.IT_STATES.SYSTEMS_INSTALLATIONS,
+                this.IT_STATES.THERMAL_PRINTERS
+            ];
             
-            session.state = this.IT_STATES.COLLECT_COMPANY_NAME;
-            this.debug('IT application started', { phoneNumber });
+            if (subServiceStates.includes(session.state)) {
+                // User is in sub-service state, move to PRICING_INFO
+                session.state = this.IT_STATES.PRICING_INFO;
+                return this.showPricingInformation(session);
+            }
+            
+            // Check if we're already in PRICING_INFO state
+            if (session.state === this.IT_STATES.PRICING_INFO) {
+                session.state = this.IT_STATES.COLLECT_COMPANY_NAME;
+                this.debug('IT application started', { phoneNumber });
 
-            return {
-                type: 'message',
-                content: `📋 You've selected to apply for *${session.selectedSubService}*.\n\nLet's collect some information to process your application.\n\nPlease provide your *Company Name*:`
-            };
+                return {
+                    type: 'message',
+                    content: `📋 You've selected to apply for *${session.selectedSubService}*.\n\nLet's collect some information to process your application.\n\nPlease provide your *Company Name*:`
+                };
+            }
         }
 
         // Handle application data collection
@@ -326,7 +347,7 @@ Please confirm if this information is correct by typing 'confirm' to submit your
         // Default response for IT states - check if we're in a sub-service state
         const serviceName = session.selectedSubService || 'IT Service';
         
-        // If we're in one of the sub-service states, guide user to type "proceed"
+        // Check if we're in a sub-service state (showing template)
         const subServiceStates = [
             this.IT_STATES.IT_AUDIT,
             this.IT_STATES.SOFTWARE_INTELLIGENCE,
@@ -335,9 +356,10 @@ Please confirm if this information is correct by typing 'confirm' to submit your
         ];
         
         if (subServiceStates.includes(session.state)) {
-            // User clicked a button but we're in sub-service state, show pricing info
-            session.state = this.IT_STATES.PRICING_INFO;
-            return this.showPricingInformation(session);
+            return {
+                type: 'message',
+                content: `📋 You're in the *${serviceName}* section.\n\nPlease type 'proceed' to continue with your application.\n\nOr:\n• Type 'back' to return to IT services\n• Type 'menu' for main menu\n• Type 'help' for assistance`
+            };
         }
         
         // If we're in PRICING_INFO state but user typed something other than "proceed"
@@ -348,7 +370,7 @@ Please confirm if this information is correct by typing 'confirm' to submit your
         // For other IT states
         return {
             type: 'message',
-            content: `📋 You're *${serviceName}* section.\n\nPlease type 'proceed' to continue with your application.\n\nOr:\n• Type 'back' to return to IT services\n• Type 'menu' for main menu\n• Type 'help' for assistance`
+            content: `📋 You're in the *${serviceName}* section.\n\nPlease type 'proceed' to continue with your application.\n\nOr:\n• Type 'back' to return to IT services\n• Type 'menu' for main menu\n• Type 'help' for assistance`
         };
     }
 
