@@ -1,10 +1,8 @@
 // it_management_flow.js - WhatsApp Chatbot IT Management Flow (FIXED)
-
 const axios = require('axios');
 
 class ITManagementFlow {
     constructor() {
-
         this.IT_STATES = {
             IT_AUDIT: 'it_audit',
             SOFTWARE_INTELLIGENCE: 'software_intelligence',
@@ -71,31 +69,19 @@ class ITManagementFlow {
         this.API_BASE_URL = 'https://chatbotbackend-1ox6.onrender.com/api/v1';
     }
 
-    debug(message, data = null) {
-        console.log(`[IT_FLOW] ${message}`);
-        if (data) console.log(data);
-    }
-
     isITState(state) {
         return Object.values(this.IT_STATES).includes(state);
     }
 
-    // ✅ FIX 1: Always move to PRICING_INFO after service selection
     startITSubService(session, phoneNumber, subServiceName) {
         const subService = this.IT_SUB_SERVICES[subServiceName];
-
         if (!subService) {
-            return {
-                type: 'message',
-                content: `❌ Invalid IT service selection.`
-            };
+            return { type: 'message', content: '❌ Invalid IT service.' };
         }
 
+        session.state = subService.state;
         session.selectedSubService = subServiceName;
         session.applicationData = {};
-        session.state = this.IT_STATES.PRICING_INFO;
-
-        this.debug('IT service selected', { phoneNumber, subServiceName });
 
         return {
             type: 'template',
@@ -106,22 +92,36 @@ class ITManagementFlow {
 
     showPricingInformation(session) {
         const pricing = this.PRICING[session.selectedSubService];
-        let message = `💰 *Pricing for ${session.selectedSubService}*\n\n`;
+        let msg = `💰 *Pricing for ${session.selectedSubService}*\n\n`;
 
         for (const [plan, price] of Object.entries(pricing)) {
-            message += `• ${plan}: ${price}\n`;
+            msg += `• ${plan}: ${price}\n`;
         }
 
-        message += `\nType *proceed* to continue or *back* to change service.`;
+        msg += `\n✅ Type *proceed* to apply\n↩️ Type *back* to go back`;
 
-        return { type: 'message', content: message };
+        return { type: 'message', content: msg };
     }
 
     async processITInput(message, session, phoneNumber) {
-        const userInput = message.trim().toLowerCase();
+        const input = message.trim().toLowerCase();
 
-        // ✅ FIX 2: Allow proceed from ANY IT service state
-        if (userInput === 'proceed' && this.isITState(session.state)) {
+        /** ✅ FIX #1: proceed from service → pricing */
+        if (
+            input === 'proceed' &&
+            [
+                this.IT_STATES.IT_AUDIT,
+                this.IT_STATES.SOFTWARE_INTELLIGENCE,
+                this.IT_STATES.SYSTEMS_INSTALLATIONS,
+                this.IT_STATES.THERMAL_PRINTERS
+            ].includes(session.state)
+        ) {
+            session.state = this.IT_STATES.PRICING_INFO;
+            return this.showPricingInformation(session);
+        }
+
+        /** ✅ FIX #2: proceed from pricing → form */
+        if (input === 'proceed' && session.state === this.IT_STATES.PRICING_INFO) {
             session.state = this.IT_STATES.COLLECT_COMPANY_NAME;
             return {
                 type: 'message',
@@ -130,24 +130,23 @@ class ITManagementFlow {
         }
 
         switch (session.state) {
-
             case this.IT_STATES.COLLECT_COMPANY_NAME:
                 session.applicationData.companyName = message;
                 session.state = this.IT_STATES.COLLECT_CONTACT_NAME;
-                return { type: 'message', content: `Please provide your *Full Name*:` };
+                return { type: 'message', content: 'Enter *Full Name*:' };
 
             case this.IT_STATES.COLLECT_CONTACT_NAME:
                 session.applicationData.contactName = message;
                 session.state = this.IT_STATES.COLLECT_EMAIL;
-                return { type: 'message', content: `Please provide your *Email Address*:` };
+                return { type: 'message', content: 'Enter *Email Address*:' };
 
             case this.IT_STATES.COLLECT_EMAIL:
                 if (!/\S+@\S+\.\S+/.test(message)) {
-                    return { type: 'message', content: `❌ Invalid email. Try again:` };
+                    return { type: 'message', content: '❌ Invalid email. Try again:' };
                 }
                 session.applicationData.email = message;
                 session.state = this.IT_STATES.COLLECT_PHONE;
-                return { type: 'message', content: `Please provide your *Phone Number*:` };
+                return { type: 'message', content: 'Enter *Phone Number*:' };
 
             case this.IT_STATES.COLLECT_PHONE:
                 session.applicationData.phoneNumber = message;
@@ -162,49 +161,35 @@ Name: ${session.applicationData.contactName}
 Email: ${session.applicationData.email}
 Phone: ${session.applicationData.phoneNumber}
 
-Type *confirm* to submit or *cancel* to stop.`
+Type *confirm* to submit or *cancel* to restart`
                 };
 
             case this.IT_STATES.CONFIRM_APPLICATION:
-                if (userInput === 'confirm') {
-                    const result = await this.createApplicationViaAPI(session, phoneNumber);
-                    if (result.success) {
-                        session.state = this.IT_STATES.IT_END;
-                        return {
-                            type: 'message',
-                            content: `✅ Application submitted successfully!\nReference: ${result.referenceNumber}`
-                        };
-                    }
-                    return { type: 'message', content: `❌ Submission failed.` };
+                if (input === 'confirm') {
+                    await this.createApplicationViaAPI(session, phoneNumber);
+                    session.state = this.IT_STATES.IT_END;
+                    return { type: 'message', content: '✅ Application submitted successfully!' };
                 }
-                return { type: 'message', content: `Type *confirm* or *cancel*.` };
+                if (input === 'cancel') {
+                    session.state = this.IT_STATES.PRICING_INFO;
+                    return this.showPricingInformation(session);
+                }
+                break;
         }
 
         return {
             type: 'message',
-            content: `Type *proceed* to apply, *back* to go back, or *menu* for main menu.`
+            content: `📋 You're in *${session.selectedSubService}*\nType *proceed* to continue or *back* to return`
         };
     }
 
     async createApplicationViaAPI(session, phoneNumber) {
-        try {
-            const response = await axios.post(
-                `${this.API_BASE_URL}/universal-applications`,
-                {
-                    ...session.applicationData,
-                    serviceType: session.selectedSubService,
-                    whatsappNumber: phoneNumber
-                }
-            );
-
-            return {
-                success: true,
-                referenceNumber: response.data?.data?.referenceNumber || 'Pending'
-            };
-
-        } catch (error) {
-            return { success: false };
-        }
+        await axios.post(`${this.API_BASE_URL}/universal-applications`, {
+            ...session.applicationData,
+            serviceType: session.selectedSubService,
+            whatsappNumber: phoneNumber
+        });
+        return true;
     }
 }
 
