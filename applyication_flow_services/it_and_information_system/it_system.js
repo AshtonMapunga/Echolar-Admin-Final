@@ -96,7 +96,7 @@ class ITManagementFlow {
         
         if (subService) {
             session.selectedSubService = subServiceName;
-            session.state = this.IT_STATES.PRICING_INFO; // CHANGED: Set to PRICING_INFO instead of sub-service specific state
+            session.state = subService.state; // Set to the specific sub-service state first
             session.applicationData = {}; // Initialize application data
             
             this.debug('Starting IT sub-service', {
@@ -105,7 +105,11 @@ class ITManagementFlow {
                 state: session.state
             });
 
-            return this.showPricingInformation(session); // CHANGED: Return pricing info immediately
+            // Return a direct message to guide the user
+            return {
+                type: 'message',
+                content: `📋 You've selected *${subServiceName}*.\n\nPlease type 'proceed' to see pricing information and start your application.\n\nOr type 'back' to return to IT services menu.`
+            };
         }
 
         return {
@@ -144,7 +148,7 @@ class ITManagementFlow {
 
     // Process IT management input
     async processITInput(message, session, phoneNumber) {
-        const userInput = message.trim();
+        const userInput = message.trim().toLowerCase();
         this.debug('Processing IT input', {
             phoneNumber,
             currentState: session.state,
@@ -152,32 +156,32 @@ class ITManagementFlow {
             originalMessage: message
         });
 
-        // Handle "proceed" or "apply" when in PRICING_INFO state
-        if ((userInput.toLowerCase() === 'proceed' || userInput.toLowerCase() === 'apply') && 
-            session.state === this.IT_STATES.PRICING_INFO) {
+        // Handle "proceed" command in all initial IT states
+        if (userInput === 'proceed' || userInput === 'apply') {
+            // If in any of the sub-service states, move to PRICING_INFO
+            if ([
+                this.IT_STATES.IT_AUDIT, 
+                this.IT_STATES.SOFTWARE_INTELLIGENCE, 
+                this.IT_STATES.SYSTEMS_INSTALLATIONS, 
+                this.IT_STATES.THERMAL_PRINTERS
+            ].includes(session.state)) {
+                session.state = this.IT_STATES.PRICING_INFO;
+                return this.showPricingInformation(session);
+            }
             
-            session.state = this.IT_STATES.COLLECT_COMPANY_NAME;
-            this.debug('IT application started', { 
-                phoneNumber,
-                service: session.selectedSubService 
-            });
+            // If already in PRICING_INFO state, start the application
+            if (session.state === this.IT_STATES.PRICING_INFO) {
+                session.state = this.IT_STATES.COLLECT_COMPANY_NAME;
+                this.debug('IT application started', { 
+                    phoneNumber,
+                    service: session.selectedSubService 
+                });
 
-            return {
-                type: 'message',
-                content: `📋 You've selected to apply for *${session.selectedSubService}*.\n\nLet's collect some information to process your application.\n\nPlease provide your *Company Name*:`
-            };
-        }
-
-        // Handle "proceed" when in sub-service specific states (for backward compatibility)
-        if ((userInput.toLowerCase() === 'proceed' || userInput.toLowerCase() === 'apply') && 
-            [this.IT_STATES.IT_AUDIT, 
-             this.IT_STATES.SOFTWARE_INTELLIGENCE, 
-             this.IT_STATES.SYSTEMS_INSTALLATIONS, 
-             this.IT_STATES.THERMAL_PRINTERS].includes(session.state)) {
-            
-            // If user types "proceed" while in sub-service state, show pricing info
-            session.state = this.IT_STATES.PRICING_INFO;
-            return this.showPricingInformation(session);
+                return {
+                    type: 'message',
+                    content: `📋 You've selected to apply for *${session.selectedSubService}*.\n\nLet's collect some information to process your application.\n\nPlease provide your *Company Name*:`
+                };
+            }
         }
 
         // Handle application data collection
@@ -237,7 +241,7 @@ Please confirm if this information is correct by typing 'confirm' to submit your
                 };
                 
             case this.IT_STATES.CONFIRM_APPLICATION:
-                if (userInput.toLowerCase() === 'confirm') {
+                if (userInput === 'confirm') {
                     // Create application via API call
                     try {
                         const applicationResult = await this.createApplicationViaAPI(session, phoneNumber);
@@ -264,11 +268,11 @@ Please confirm if this information is correct by typing 'confirm' to submit your
                             content: `❌ Error creating application. Please try again or contact support.\n\n🔄 Type 'retry' to try again.`
                         };
                     }
-                } else if (userInput.toLowerCase() === 'cancel') {
+                } else if (userInput === 'cancel') {
                     session.state = this.IT_STATES.PRICING_INFO;
                     session.applicationData = {};
                     return this.showPricingInformation(session);
-                } else if (userInput.toLowerCase() === 'retry') {
+                } else if (userInput === 'retry') {
                     // Try to create application again
                     try {
                         const applicationResult = await this.createApplicationViaAPI(session, phoneNumber);
@@ -303,8 +307,21 @@ Please confirm if this information is correct by typing 'confirm' to submit your
         }
 
         // Handle navigation commands
-        if (userInput.toLowerCase() === 'back') {
-            // Go back to IT main menu
+        if (userInput === 'back') {
+            // If in application flow, go back to pricing info
+            if ([
+                this.IT_STATES.PRICING_INFO,
+                this.IT_STATES.COLLECT_COMPANY_NAME,
+                this.IT_STATES.COLLECT_CONTACT_NAME,
+                this.IT_STATES.COLLECT_EMAIL,
+                this.IT_STATES.COLLECT_PHONE
+            ].includes(session.state)) {
+                session.state = this.IT_STATES.PRICING_INFO;
+                session.applicationData = {};
+                return this.showPricingInformation(session);
+            }
+            
+            // Otherwise go back to IT main menu
             session.state = 'it_is_management';
             session.selectedSubService = null;
             session.applicationData = {};
@@ -316,7 +333,7 @@ Please confirm if this information is correct by typing 'confirm' to submit your
             };
         }
 
-        if (userInput.toLowerCase() === 'menu') {
+        if (userInput === 'menu') {
             // Go to main menu
             session.state = 'main_menu';
             session.selectedService = null;
@@ -331,31 +348,38 @@ Please confirm if this information is correct by typing 'confirm' to submit your
         }
 
         // Handle "help" command
-        if (userInput.toLowerCase() === 'help') {
+        if (userInput === 'help') {
             return {
                 type: 'message',
-                content: `🆘 *Help - IT Management Services*\n\n• Type 'proceed' to start your application\n• Type 'back' to return to IT services menu\n• Type 'menu' for main menu\n• For pricing, type 'proceed' when viewing service details\n\nNeed immediate assistance? Contact our support team at support@example.com`
+                content: `🆘 *Help - IT Management Services*\n\n• Type 'proceed' to start your application\n• Type 'back' to return to IT services menu\n• Type 'menu' for main menu\n\nNeed immediate assistance? Contact our support team at support@example.com`
             };
         }
 
         // Default response for IT states
         const serviceName = session.selectedSubService || 'IT Service';
         
-        // If we're in a sub-service specific state, guide user to type "proceed"
-        if ([this.IT_STATES.IT_AUDIT, 
-             this.IT_STATES.SOFTWARE_INTELLIGENCE, 
-             this.IT_STATES.SYSTEMS_INSTALLATIONS, 
-             this.IT_STATES.THERMAL_PRINTERS].includes(session.state)) {
+        // Check if we're in a sub-service specific state
+        if ([
+            this.IT_STATES.IT_AUDIT, 
+            this.IT_STATES.SOFTWARE_INTELLIGENCE, 
+            this.IT_STATES.SYSTEMS_INSTALLATIONS, 
+            this.IT_STATES.THERMAL_PRINTERS
+        ].includes(session.state)) {
             return {
                 type: 'message',
                 content: `📋 You're in the *${serviceName}* section.\n\nTo proceed with your application, please type 'proceed' to see pricing information and continue.\n\nOr:\n• Type 'back' to return to IT services\n• Type 'menu' for main menu\n• Type 'help' for assistance`
             };
         }
         
+        // If in PRICING_INFO state
+        if (session.state === this.IT_STATES.PRICING_INFO) {
+            return this.showPricingInformation(session);
+        }
+        
         // For other IT states
         return {
             type: 'message',
-            content: `📋 You're in the *${serviceName}* section.\n\nPlease use the interactive buttons or:\n• Type 'proceed' to start application\n• Type 'back' to return to IT services\n• Type 'menu' for main menu\n• Type 'help' for assistance`
+            content: `📋 You're in the *${serviceName}* section.\n\nPlease type 'proceed' to continue with your application.\n\nOr:\n• Type 'back' to return to IT services\n• Type 'menu' for main menu\n• Type 'help' for assistance`
         };
     }
 
