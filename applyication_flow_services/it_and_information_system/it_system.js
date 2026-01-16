@@ -1,13 +1,9 @@
-// it_management_flow.js - WhatsApp Chatbot IT Management Flow (FIXED)
+// it_management_flow.js - FIXED TO MATCH BUSINESS SOFTWARE FLOW
 const axios = require('axios');
 
 class ITManagementFlow {
     constructor() {
         this.IT_STATES = {
-            IT_AUDIT: 'it_audit',
-            SOFTWARE_INTELLIGENCE: 'software_intelligence',
-            SYSTEMS_INSTALLATIONS: 'systems_installations',
-            THERMAL_PRINTERS: 'thermal_printers',
             PRICING_INFO: 'pricing_info_it',
             COLLECT_COMPANY_NAME: 'collect_company_name_it',
             COLLECT_CONTACT_NAME: 'collect_contact_name_it',
@@ -18,29 +14,10 @@ class ITManagementFlow {
         };
 
         this.IT_TEMPLATES = {
-            IT_AUDIT: 'HXfb0f36358bcdbca9a7742b5107e2fddf',
-            SOFTWARE_INTELLIGENCE: 'HX7f301c313989a0f88d494b2e0a2e69dd',
-            SYSTEMS_INSTALLATIONS: 'HX98ca59d8a7987209885d081aed32c6e9',
-            THERMAL_PRINTERS: 'HXad85adb917b23f84a24a2ffdb2924957'
-        };
-
-        this.IT_SUB_SERVICES = {
-            'IT Audit & Consultancy': {
-                templateId: this.IT_TEMPLATES.IT_AUDIT,
-                state: this.IT_STATES.IT_AUDIT
-            },
-            'Software Intelligence': {
-                templateId: this.IT_TEMPLATES.SOFTWARE_INTELLIGENCE,
-                state: this.IT_STATES.SOFTWARE_INTELLIGENCE
-            },
-            'Systems Installations': {
-                templateId: this.IT_TEMPLATES.SYSTEMS_INSTALLATIONS,
-                state: this.IT_STATES.SYSTEMS_INSTALLATIONS
-            },
-            'Thermal Printers': {
-                templateId: this.IT_TEMPLATES.THERMAL_PRINTERS,
-                state: this.IT_STATES.THERMAL_PRINTERS
-            }
+            'IT Audit & Consultancy': 'HXfb0f36358bcdbca9a7742b5107e2fddf',
+            'Software Intelligence': 'HX7f301c313989a0f88d494b2e0a2e69dd',
+            'Systems Installations': 'HX98ca59d8a7987209885d081aed32c6e9',
+            'Thermal Printers': 'HXad85adb917b23f84a24a2ffdb2924957'
         };
 
         this.PRICING = {
@@ -69,26 +46,21 @@ class ITManagementFlow {
         this.API_BASE_URL = 'https://chatbotbackend-1ox6.onrender.com/api/v1';
     }
 
-    isITState(state) {
-        return Object.values(this.IT_STATES).includes(state);
-    }
+    /* ================= START SUB SERVICE ================= */
 
     startITSubService(session, phoneNumber, subServiceName) {
-        const subService = this.IT_SUB_SERVICES[subServiceName];
-        if (!subService) {
-            return { type: 'message', content: '❌ Invalid IT service.' };
-        }
-
-        session.state = subService.state;
         session.selectedSubService = subServiceName;
+        session.state = this.IT_STATES.PRICING_INFO;
         session.applicationData = {};
 
         return {
             type: 'template',
-            templateSid: subService.templateId,
+            templateSid: this.IT_TEMPLATES[subServiceName],
             variables: {}
         };
     }
+
+    /* ================= PRICING ================= */
 
     showPricingInformation(session) {
         const pricing = this.PRICING[session.selectedSubService];
@@ -98,30 +70,21 @@ class ITManagementFlow {
             msg += `• ${plan}: ${price}\n`;
         }
 
-        msg += `\n✅ Type *proceed* to apply\n↩️ Type *back* to go back`;
+        msg += `\n✅ Type *proceed* to continue\n↩️ Type *back* to return`;
 
         return { type: 'message', content: msg };
     }
 
+    /* ================= INPUT HANDLER ================= */
+
     async processITInput(message, session, phoneNumber) {
-        const input = message.trim().toLowerCase();
+        const userInput = message.trim().toLowerCase();
 
-        /** ✅ FIX #1: proceed from service → pricing */
+        /** PROCEED FROM PRICING → FORM */
         if (
-            input === 'proceed' &&
-            [
-                this.IT_STATES.IT_AUDIT,
-                this.IT_STATES.SOFTWARE_INTELLIGENCE,
-                this.IT_STATES.SYSTEMS_INSTALLATIONS,
-                this.IT_STATES.THERMAL_PRINTERS
-            ].includes(session.state)
+            (userInput === 'proceed' || userInput === 'apply') &&
+            session.state === this.IT_STATES.PRICING_INFO
         ) {
-            session.state = this.IT_STATES.PRICING_INFO;
-            return this.showPricingInformation(session);
-        }
-
-        /** ✅ FIX #2: proceed from pricing → form */
-        if (input === 'proceed' && session.state === this.IT_STATES.PRICING_INFO) {
             session.state = this.IT_STATES.COLLECT_COMPANY_NAME;
             return {
                 type: 'message',
@@ -151,6 +114,7 @@ class ITManagementFlow {
             case this.IT_STATES.COLLECT_PHONE:
                 session.applicationData.phoneNumber = message;
                 session.state = this.IT_STATES.CONFIRM_APPLICATION;
+
                 return {
                     type: 'message',
                     content:
@@ -165,31 +129,58 @@ Type *confirm* to submit or *cancel* to restart`
                 };
 
             case this.IT_STATES.CONFIRM_APPLICATION:
-                if (input === 'confirm') {
+                if (userInput === 'confirm') {
                     await this.createApplicationViaAPI(session, phoneNumber);
                     session.state = this.IT_STATES.IT_END;
                     return { type: 'message', content: '✅ Application submitted successfully!' };
                 }
-                if (input === 'cancel') {
+
+                if (userInput === 'cancel') {
                     session.state = this.IT_STATES.PRICING_INFO;
+                    session.applicationData = {};
                     return this.showPricingInformation(session);
                 }
                 break;
         }
 
+        /* NAVIGATION */
+        if (userInput === 'back') {
+            session.state = 'it_is_management';
+            session.selectedSubService = null;
+            session.applicationData = {};
+            return {
+                type: 'template',
+                templateSid: 'HXc7b4fbad99fe9dc75f48a96a422bfeb2',
+                variables: {}
+            };
+        }
+
+        if (userInput === 'menu') {
+            session.state = 'main_menu';
+            session.selectedSubService = null;
+            session.applicationData = {};
+            return {
+                type: 'template',
+                templateSid: 'HX1709f2dbf88a5e5cf077a618ada6a8e0',
+                variables: {}
+            };
+        }
+
         return {
             type: 'message',
-            content: `📋 You're in *${session.selectedSubService}*\nType *proceed* to continue or *back* to return`
+            content: `Type *proceed* to continue or *back* to return`
         };
     }
+
+    /* ================= API ================= */
 
     async createApplicationViaAPI(session, phoneNumber) {
         await axios.post(`${this.API_BASE_URL}/universal-applications`, {
             ...session.applicationData,
             serviceType: session.selectedSubService,
-            whatsappNumber: phoneNumber
+            whatsappNumber: phoneNumber,
+            status: 'Pending'
         });
-        return true;
     }
 }
 
