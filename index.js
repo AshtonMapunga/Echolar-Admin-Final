@@ -112,7 +112,7 @@ debug('Twilio Configuration', {
 const client = twilio(accountSid, authToken);
 
 // Twilio Messaging Service SID (for WhatsApp Business API)
-const MESSAGING_SERVICE_SID = process.env.MESSAGING_SERVICE_SID || 'MG07d4f69273881dca15456fe895a49eec';
+const MESSAGING_SERVICE_SID = process.env.MESSAGING_SERVICE_SID || '';
 
 // Template configuration
 const WELCOME_TEMPLATE_SID = 'HX9d97210101cad9ddb8ea5b1db8f7a6a9';
