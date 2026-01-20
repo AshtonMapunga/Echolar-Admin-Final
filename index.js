@@ -31,11 +31,11 @@ const CollegelyRoutes = require('./routes/college_reg_route');
 async function connectToDatabase() {
     try {
         const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://sebatech2024:xcGRZSYqgiLbwbO0@escholar.f51th.mongodb.net/reg';
-        
+
         debug('Connecting to MongoDB', {
             uri: MONGODB_URI.replace(/\/\/([^:]+):([^@]+)@/, '//***:***@') // Hide credentials in logs
         });
-        
+
         await mongoose.connect(MONGODB_URI, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
@@ -45,7 +45,7 @@ async function connectToDatabase() {
         //change
         console.log('✅ Connected to MongoDB successfully');
         debug('MongoDB connection established');
-        
+
     } catch (error) {
         debug('MongoDB connection error', {
             error: error.message,
@@ -95,8 +95,8 @@ debug('Environment', {
 });
 
 // Twilio credentials - update these with your actual credentials
-const accountSid =  process.env.TWILIO_ACCOUNT_SID ;
-const authToken = process.env.TWILIO_AUTH_TOKEN ;
+const accountSid = process.env.TWILIO_ACCOUNT_SID;
+const authToken = process.env.TWILIO_AUTH_TOKEN;
 
 
 
@@ -104,23 +104,23 @@ const authToken = process.env.TWILIO_AUTH_TOKEN ;
 console.log("SID value------------------------:", process.env.TWILIO_ACCOUNT_SID);
 
 debug('Twilio Configuration', {
-  accountSidSet: !!accountSid,
-  authTokenSet: !!authToken,
-  authTokenLength: authToken ? authToken.length : 0
+    accountSidSet: !!accountSid,
+    authTokenSet: !!authToken,
+    authTokenLength: authToken ? authToken.length : 0
 });
 
 
 if (!accountSid || !authToken) {
-  throw new Error("❌ Twilio credentials are missing");
+    throw new Error("❌ Twilio credentials are missing");
 }
 
 const client = twilio(accountSid, authToken);
 
 // Twilio Messaging Service SID (for WhatsApp Business API)
-const MESSAGING_SERVICE_SID = process.env.MESSAGING_SERVICE_SID ;
+const MESSAGING_SERVICE_SID = process.env.MESSAGING_SERVICE_SID;
 
 if (!MESSAGING_SERVICE_SID) {
-  throw new Error("❌ MESSAGING_SERVICE_SID is missing");
+    throw new Error("❌ MESSAGING_SERVICE_SID is missing");
 }
 
 // Template configuration good
@@ -131,19 +131,22 @@ debug('WhatsApp Configuration', {
     welcomeTemplateSid: WELCOME_TEMPLATE_SID
 });
 
-// Middleware
-app.use(cors(
-    {
-           origin: [
-   
-    "https://company-reg-admin.vercel.app",
-     "http://localhost:5173"
-   
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  allowedHeaders: ["Content-Type", "application/json"],
-    }
-));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:5173",
+      "https://company-reg-admin.vercel.app"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type"],
+    preflightContinue: false,
+    optionsSuccessStatus: 204
+  })
+);
+
+// IMPORTANT: handle preflight
+app.options("*", cors());
+
 //try
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -178,17 +181,17 @@ async function sendWhatsAppTemplate(to, templateSid, templateVariables = {}) {
         templateVariables: templateVariables,
         messagingServiceSid: MESSAGING_SERVICE_SID
     });
-    
+
     try {
         // Validate inputs
         if (!to || !templateSid) {
             throw new Error('Missing required parameters: to or templateSid');
         }
-        
+
         if (!MESSAGING_SERVICE_SID || MESSAGING_SERVICE_SID === 'MG07d4f69273881dca15456fe895a49eec') {
             debug('Warning: Using default Messaging Service SID - make sure this is correct');
         }
-        
+
         const messageConfig = {
             messagingServiceSid: MESSAGING_SERVICE_SID,
             to: to,
@@ -200,9 +203,9 @@ async function sendWhatsAppTemplate(to, templateSid, templateVariables = {}) {
         if (Object.keys(templateVariables).length > 0) {
             messageConfig.contentVariables = JSON.stringify(templateVariables);
         }
-        
+
         const response = await client.messages.create(messageConfig);
-        
+
         debug('Template message sent successfully', {
             sid: response.sid,
             status: response.status,
@@ -212,7 +215,7 @@ async function sendWhatsAppTemplate(to, templateSid, templateVariables = {}) {
             dateCreated: response.dateCreated,
             direction: response.direction
         });
-        
+
         console.log('✅ Template message sent:', response.sid);
         return response;
     } catch (error) {
@@ -226,7 +229,7 @@ async function sendWhatsAppTemplate(to, templateSid, templateVariables = {}) {
             templateSid: templateSid,
             messagingServiceSid: MESSAGING_SERVICE_SID
         });
-        
+
         console.error('❌ Error sending template message:', error);
         throw error;
     }
@@ -239,23 +242,23 @@ async function sendWhatsAppMessage(to, message) {
         message: message,
         messagingServiceSid: MESSAGING_SERVICE_SID
     });
-    
+
     try {
         if (!to || !message) {
             throw new Error('Missing required parameters: to or message');
         }
-        
+
         if (!MESSAGING_SERVICE_SID || MESSAGING_SERVICE_SID === 'MG07d4f69273881dca15456fe895a49eec') {
             debug('Warning: Using default Messaging Service SID - make sure this is correct');
         }
-        
+
         const response = await client.messages.create({
             messagingServiceSid: MESSAGING_SERVICE_SID,
             body: message,
             to: to,
             statusCallback: `https://your-render-app.onrender.com/status` // Add your actual render URL here
         });
-        
+
         debug('Message sent successfully', {
             sid: response.sid,
             status: response.status,
@@ -264,7 +267,7 @@ async function sendWhatsAppMessage(to, message) {
             dateCreated: response.dateCreated,
             direction: response.direction
         });
-        
+
         console.log('✅ Message sent:', response.sid);
         return response;
     } catch (error) {
@@ -277,7 +280,7 @@ async function sendWhatsAppMessage(to, message) {
             to: to,
             messagingServiceSid: MESSAGING_SERVICE_SID
         });
-        
+
         console.error('❌ Error sending message:', error);
         throw error;
     }
@@ -290,9 +293,9 @@ async function sendWhatsAppMessage(to, message) {
 //         messageType: typeof message,
 //         userPhoneNumber: userPhoneNumber
 //     });
-    
+
 //     const userInput = (typeof message === 'string' ? message.trim().toLowerCase() : '');
-    
+
 //     debug('Processed input', {
 //         userInput: userInput,
 //         length: userInput.length
@@ -315,16 +318,16 @@ async function processUserInput(message, userPhoneNumber) {
         messageType: typeof message,
         userPhoneNumber: userPhoneNumber
     });
-    
+
     try {
         // Use the FlowTree to process the input
         const response = await flowTree.processInput(message, userPhoneNumber);
-        
+
         debug('FlowTree response', {
             response: response,
             userPhone: userPhoneNumber
         });
-        
+
         // If response is a template, send it
         if (response.type === 'template') {
             try {
@@ -335,16 +338,16 @@ async function processUserInput(message, userPhoneNumber) {
                     error: error.message,
                     templateSid: response.templateSid
                 });
-                
+
                 // Fallback to regular message if template fails
                 const fallbackMessage = getFallbackMessage(response);
                 return { type: 'message', content: fallbackMessage };
             }
         }
-        
+
         // Return regular message response
         return response;
-        
+
     } catch (error) {
         debug('Error in processUserInput', {
             error: error.message,
@@ -352,7 +355,7 @@ async function processUserInput(message, userPhoneNumber) {
             userPhone: userPhoneNumber,
             message: message
         });
-        
+
         // Fallback response for errors
         return {
             type: 'message',
@@ -371,7 +374,7 @@ function getFallbackMessage(templateResponse) {
         'HX_info_collection_template_id': "📝 Please provide the requested information.",
         'HX_confirmation_template_id': "📋 Please review and confirm your information."
     };
-    
+
     return fallbacks[templateResponse.templateSid] || "📋 Please choose from the available options.";
 }
 
@@ -390,14 +393,14 @@ app.get('/debug/sessions', (req, res) => {
 app.get('/debug/session/:phone', (req, res) => {
     const phone = req.params.phone;
     const session = flowTree.getSessionInfo(phone);
-    
+
     if (!session) {
         return res.status(404).json({
             error: 'Session not found',
             phone: phone
         });
     }
-    
+
     res.json({
         phone: phone,
         session: session
@@ -417,13 +420,13 @@ app.post('/debug/reset/:phone', (req, res) => {
 // Test endpoint to simulate user input
 app.post('/test/input', async (req, res) => {
     const { phone, message } = req.body;
-    
+
     if (!phone || !message) {
         return res.status(400).json({
             error: 'Missing phone or message in request body'
         });
     }
-    
+
     try {
         const response = await processUserInput(message, phone);
         res.json({
@@ -446,17 +449,17 @@ app.post('/status', (req, res) => {
         body: req.body,
         contentType: req.headers['content-type']
     });
-    
-    const { 
-        MessageSid, 
-        MessageStatus, 
-        ErrorCode, 
+
+    const {
+        MessageSid,
+        MessageStatus,
+        ErrorCode,
         ErrorMessage,
         From,
         To,
         Body
     } = req.body;
-    
+
     debug('Message status update', {
         MessageSid: MessageSid,
         MessageStatus: MessageStatus,
@@ -466,14 +469,14 @@ app.post('/status', (req, res) => {
         To: To,
         Body: Body
     });
-    
+
     // Log the status for debugging
     console.log(`📊 Message Status Update: ${MessageSid} - ${MessageStatus}`);
-    
+
     if (ErrorCode) {
         console.error(`❌ Message Error ${ErrorCode}: ${ErrorMessage}`);
     }
-    
+
     res.status(200).send('OK');
 });
 
@@ -483,10 +486,10 @@ app.post('/webhook', async (req, res) => {
         body: req.body,
         contentType: req.headers['content-type']
     });
-    
+
     try {
         const { From, Body, MessageSid, AccountSid, To } = req.body;
-        
+
         debug('Parsed webhook data', {
             From: From,
             Body: Body,
@@ -494,7 +497,7 @@ app.post('/webhook', async (req, res) => {
             AccountSid: AccountSid,
             To: To
         });
-        
+
         if (!From || !Body) {
             debug('Missing required fields', {
                 hasFrom: !!From,
@@ -502,23 +505,23 @@ app.post('/webhook', async (req, res) => {
             });
             return res.status(400).send('Missing required fields');
         }
-        
+
         console.log(`📨 Received message from ${From}: ${Body}`);
-        
+
         // Process the user input
         const response = await processUserInput(Body, From);
-        
+
         debug('Generated response', {
             response: response
         });
-        
+
         // Send appropriate response based on type
         if (response.type === 'template' && response.sent) {
             console.log('✅ Template message already sent');
         } else if (response.type === 'message') {
             await sendWhatsAppMessage(From, response.content);
         }
-        
+
         debug('Webhook processed successfully');
         res.status(200).send('OK');
     } catch (error) {
@@ -527,7 +530,7 @@ app.post('/webhook', async (req, res) => {
             stack: error.stack,
             name: error.name
         });
-        
+
         console.error('❌ Webhook error:', error);
         res.status(500).send('Error processing message');
     }
@@ -544,7 +547,7 @@ app.get('/health', (req, res) => {
         environment: process.env.NODE_ENV || 'development',
         welcomeTemplateSid: WELCOME_TEMPLATE_SID
     };
-    
+
     debug('Health check response', healthData);
     res.json(healthData);
 });
@@ -562,7 +565,7 @@ app.use((error, req, res, next) => {
         url: req.url,
         method: req.method
     });
-    
+
     console.error('❌ Express Error:', error);
     res.status(500).json({
         error: 'Internal Server Error',
@@ -576,7 +579,7 @@ app.use((req, res) => {
         url: req.url,
         method: req.method
     });
-    
+
     res.status(404).json({
         error: 'Not Found',
         message: `Route ${req.method} ${req.url} not found`
@@ -584,13 +587,13 @@ app.use((req, res) => {
 });
 
 // Start server
-app.listen(PORT, async() => {
+app.listen(PORT, async () => {
     console.log(`🚀 WhatsApp Chatbot Server running on port ${PORT}`);
 
-        await connectToDatabase();
+    await connectToDatabase();
     console.log(`📱 Webhook URL: http://localhost:${PORT}/webhook`);
     console.log(`📋 Welcome Template SID: ${WELCOME_TEMPLATE_SID}`);
-    
+
     debug('Server started', {
         port: PORT,
         environment: process.env.NODE_ENV || 'development',
@@ -602,13 +605,13 @@ app.listen(PORT, async() => {
     if (!IS_PRODUCTION) {
         try {
             // Start ngrok tunnel
-            const listener = await ngrok.connect({ 
-                addr: PORT, 
+            const listener = await ngrok.connect({
+                addr: PORT,
                 authtoken_from_env: true
             });
             console.log(`🚀 Ngrok tunnel established at: ${listener.url()}`);
             console.log(`📱 Set this as your webhook URL in Twilio: ${listener.url()}/webhook`);
-            
+
             debug('Ngrok tunnel started', {
                 url: listener.url()
             });
