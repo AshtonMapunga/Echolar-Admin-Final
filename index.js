@@ -103,11 +103,12 @@ const authToken = process.env.TWILIO_AUTH_TOKEN ;
 
 console.log("SID value------------------------:", process.env.TWILIO_ACCOUNT_SID);
 
-
 debug('Twilio Configuration', {
-    accountSid: accountSid.substring(0, 10) + '...',
-    authTokenLength: authToken.length
+  accountSidSet: !!accountSid,
+  authTokenSet: !!authToken,
+  authTokenLength: authToken ? authToken.length : 0
 });
+
 
 if (!accountSid || !authToken) {
   throw new Error("❌ Twilio credentials are missing");
