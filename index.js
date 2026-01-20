@@ -131,22 +131,19 @@ debug('WhatsApp Configuration', {
     welcomeTemplateSid: WELCOME_TEMPLATE_SID
 });
 
+// Middleware
 app.use(
-  cors({
-    origin: [
-      "http://localhost:5173",
-      "https://company-reg-admin.vercel.app"
-    ],
-    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
-    allowedHeaders: ["Content-Type"],
-    preflightContinue: false,
-    optionsSuccessStatus: 204
-  })
+    cors({
+        origin: [
+            "http://localhost:5173",
+            "https://company-reg-admin.vercel.app"
+        ],
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type"],
+        preflightContinue: false,
+        optionsSuccessStatus: 204
+    })
 );
-
-// IMPORTANT: handle preflight
-app.options("*", cors());
-
 //try
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
