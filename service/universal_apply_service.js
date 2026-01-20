@@ -20,7 +20,14 @@ class UniversalApplyService {
             this.debug('Creating new universal application', applicationData);
 
             // Validate required fields
-            const requiredFields = ['companyName', 'email', 'contactName', 'phoneNumber'];
+          const requiredFields = [
+  'companyName',
+  'email',
+  'contactName',
+  'phoneNumber',
+  'serviceType'
+];
+
             const missingFields = requiredFields.filter(field => !applicationData[field]);
 
             if (missingFields.length > 0) {
@@ -34,12 +41,14 @@ class UniversalApplyService {
             }
 
             // Create the application
-            const application = new UniversalApply({
-                companyName: applicationData.companyName.trim(),
-                email: applicationData.email.toLowerCase().trim(),
-                contactName: applicationData.contactName.trim(),
-                phoneNumber: applicationData.phoneNumber.trim()
-            });
+           const application = new UniversalApply({
+  companyName: applicationData.companyName.trim(),
+  email: applicationData.email.toLowerCase().trim(),
+  contactName: applicationData.contactName.trim(),
+  phoneNumber: applicationData.phoneNumber.trim(),
+  serviceType: applicationData.serviceType.trim(), 
+  status: applicationData.status || "Pending"      
+});
 
             const savedApplication = await application.save();
             this.debug('Universal application created successfully', { 
