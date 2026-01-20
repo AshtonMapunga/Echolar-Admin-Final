@@ -95,8 +95,8 @@ debug('Environment', {
 });
 
 // Twilio credentials - update these with your actual credentials
-const accountSid =  'AC1b18fc71b6f3d0532f7552da14cfb52e';
-const authToken = process.env.TWILIO_AUTH_TOKEN || 'YOUR_AUTH_TOKEN';
+const accountSid =  process.env.TWILIO_ACCOUNT_SID ;
+const authToken = process.env.TWILIO_AUTH_TOKEN ;
 
 
 
@@ -109,10 +109,18 @@ debug('Twilio Configuration', {
     authTokenLength: authToken.length
 });
 
+if (!accountSid || !authToken) {
+  throw new Error("❌ Twilio credentials are missing");
+}
+
 const client = twilio(accountSid, authToken);
 
 // Twilio Messaging Service SID (for WhatsApp Business API)
-const MESSAGING_SERVICE_SID = process.env.MESSAGING_SERVICE_SID || '';
+const MESSAGING_SERVICE_SID = process.env.MESSAGING_SERVICE_SID ;
+
+if (!MESSAGING_SERVICE_SID) {
+  throw new Error("❌ MESSAGING_SERVICE_SID is missing");
+}
 
 // Template configuration
 const WELCOME_TEMPLATE_SID = 'HX9d97210101cad9ddb8ea5b1db8f7a6a9';
