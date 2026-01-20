@@ -122,7 +122,7 @@ if (!MESSAGING_SERVICE_SID) {
   throw new Error("❌ MESSAGING_SERVICE_SID is missing");
 }
 
-// Template configuration
+// Template configuration good
 const WELCOME_TEMPLATE_SID = 'HX9d97210101cad9ddb8ea5b1db8f7a6a9';
 
 debug('WhatsApp Configuration', {
